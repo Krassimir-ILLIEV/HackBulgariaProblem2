@@ -1,0 +1,203 @@
+import java.io.FileInputStream;
+import java.util.Scanner;
+
+public class Rectangle2 {
+
+    private static String[][] InputFromFile(String filename) {
+        FileInputStream fileInput = null;
+        String[][] Grid = null;
+        try {
+            fileInput = new FileInputStream(filename);
+            Scanner scanner = new Scanner(fileInput);
+            String input = scanner.nextLine();
+
+            String[] s = input.replaceAll("\\s+", " ").split(" ");
+            int N = Integer.parseInt(s[0]);
+            int M = Integer.parseInt(s[1]);
+            Grid = new String[N][M];
+            //System.out.println(M);
+            //System.out.println(N);
+
+            int i = 0;
+            while (scanner.hasNextLine()) {
+                input = scanner.nextLine().replaceAll("\\s+", " ");
+                String[] st = input.split(" ");
+
+                //System.out.println(input);
+                for (int j = 0; j < M; j++) {
+                    Grid[i][j] = st[j];
+                }
+                i++;
+
+            }
+            
+            //for (int k = 0; k < N; k++) {
+                //for (int j = 0; j < M; j++) {
+                    //System.out.print(Grid[k][j]);
+                //}
+                //System.out.println();
+            //}
+            scanner.close();
+            fileInput.close();
+        } catch (Exception e) {
+            System.out.println("Oops!Something went wrong.");
+
+        }
+        return Grid;
+    }
+
+    public static int search(String rcd, String word) {
+        // rcd-row,column,diagonal
+        int index = 0;
+        int rcdCounter = 0;
+        do {
+            index = rcd.indexOf(word, index);
+            if (index > -1) {
+                rcdCounter++;
+                index++;
+            }
+        } while (index != -1);
+
+        return rcdCounter;
+    }
+
+    public static String[][] InputFromCommandLine(String[] args) {
+
+        int N = Integer.parseInt(args[1]);
+        int M = Integer.parseInt(args[2]);
+
+        String[][] Grid = new String[N][M];
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                Grid[i][j] = // StdIn.readString();
+                args[i * M + j + 3];
+
+            }
+        }
+        return Grid;
+    }
+
+    public static String reverse(String word) {
+
+        int wordLength = word.length();
+        String reversedWord = "";
+        for (int i = 1; i <= wordLength; i++) { // check it
+            reversedWord += word.charAt(wordLength - i);
+        }
+        return reversedWord;
+    }
+
+    private static boolean isNumeric(String str) {
+        try {
+            int d = Integer.parseInt(str);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        // sample command line arguments:
+        // ivan 5 4 i v a n e v n h i n a v m v v n q r i t
+        // alternative command line arguments:
+        // ivan wordGame.txt
+        String[][] Grid;
+        if (isNumeric(args[1]))
+            Grid = InputFromCommandLine(args);
+        else
+            Grid = InputFromFile(args[1]);
+
+        String word = args[0];
+
+        int N = Grid.length;
+        int M = Grid[0].length;
+
+        String rcd = "";
+        int totalCounter = 0;
+        String reverseWord = reverse(word);
+        // rows
+        if (word.length() <= M) {
+            for (int i = 0; i < N; i++) {
+                rcd = "";
+                for (int j = 0; j < M; j++) {
+                    rcd += Grid[i][j];
+                }
+                //System.out.println(rcd);
+                totalCounter += search(rcd, word);
+                totalCounter += search(rcd, reverseWord);
+            }
+            //System.out.println(totalCounter);
+        }
+        // columns
+        //System.out.println("columns");
+        if (word.length() <= N) {
+            for (int j = 0; j < M; j++) {
+                rcd = "";
+                for (int i = 0; i < N; i++) {
+
+                    rcd += Grid[i][j];
+                }
+                //System.out.println(rcd);
+                totalCounter += search(rcd, word);
+                totalCounter += search(rcd, reverseWord);
+            }
+            //System.out.println(totalCounter);
+        }
+        // main diagonal (upper part)
+        if (word.length() <= Math.min(N, M)) {
+            for (int j = 0; j < M - word.length() + 1; j++) {
+                rcd = "";
+                for (int k = 0; k < Math.min(M - j, N); k++) {
+                    rcd += Grid[k][k + j];
+                }
+                //System.out.println(rcd);
+                totalCounter += search(rcd, word);
+                totalCounter += search(rcd, reverseWord);
+            }
+            // main diagonal (lower)
+
+            for (int i = 1; i < N - word.length() + 1; i++) {
+                rcd = "";
+                for (int k = 0; k < Math.min(N - i, M); k++) {
+                    rcd += Grid[k + i][k];
+                }
+                //System.out.println(rcd);
+                totalCounter += search(rcd, word);
+                totalCounter += search(rcd, reverseWord);
+            }
+
+            //System.out.println(totalCounter);
+            // secondary diagonal
+            //System.out.println("---secondary diag----");
+            for (int j = 0; j < M; j++) {
+                rcd = "";
+                for (int k = 0; k < Math.min(M - j, N); k++) {// in case N<M
+                    rcd += Grid[N - 1 - k][k + j];
+                }
+
+                //System.out.println(rcd);
+                totalCounter += search(rcd, word);
+                totalCounter += search(rcd, reverseWord);
+            }
+
+            //System.out.println(totalCounter);
+            // secondary diagonal
+            //System.out.println("---2nd secondary diag----");
+            for (int i = 0; i < N - 1; i++) {// N-1 so that secondary diagonal
+                                             // is not counted twice
+                rcd = "";
+                for (int k = 0; k < Math.min(i + 1, M); k++) {
+
+                    rcd += Grid[i - k][k];
+                }
+
+                //System.out.println(rcd);
+                totalCounter += search(rcd, word);
+                totalCounter += search(rcd, reverseWord);
+            }
+        }
+        System.out.println("Number of occurrences of "+word+": "+totalCounter);
+    } 
+
+
+}
